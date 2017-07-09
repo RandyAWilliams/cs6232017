@@ -1,1 +1,91 @@
 # cs6232017
+
+Week 5 SQL for product, depot and stock
+
+#1
+select prod_id
+from product
+where pname like 'p%' and price <=300;
+
+#2
+select pname
+from product, stock
+where product.prod_id = stock.prod_id and stock.dep = 'd2';
+
+select prod_id
+from product
+where prod_id
+in (select prod_id from stock where dep = 'd2);
+
+#3
+select product.prod_id
+from product, stock
+where product.prod_id = stock.prod_id and stock.quantity <=0;
+
+select product.prod_id
+from product
+where prod_id
+in (select prod_id from stock where dep = 'd2');
+
+#4
+select depot.depot_id, depot.addr
+from depot, stock
+where stock.prod_id = 'p1' and stock.dep = depot.depot_id;
+
+select depot.depot_id, depot.addr
+from depot
+where exists (select * from stock where stock.prod_id = 'p1' and stock.dep = depot.depot_id);
+
+select depot.depot_id, depot.addr
+from depot
+where depot.depot_id in (select stock.dep from stock where stock.prod_id = 'p1');
+
+#5
+select prod_id
+from product
+where price >=250 intersect( select prod_id from product where price <=400.0);
+
+select prod_id
+from product
+where price >= 250 and price <=400;
+
+#6
+select count(*)
+from stock
+where quantity <=0;
+
+#7
+select avg(price)
+from depot, stock, product
+where depot.depot_id = stock.dep and stock.prod_id = product.prod_id;
+
+#8
+select depot_id, addr
+from depot
+where volume in (select max(volume) from depot);
+
+#9
+select prod_id, sum (quantity)
+from stock
+where quantity > 0 group by prod_id;
+
+#10
+select product.pname
+from stock, product
+group by product.pname having count (*)>2;
+
+select product.pname 
+from product, stock
+where product.prod_id = stock.prod_id;
+
+#11
+select prod_id 
+from stock
+group by prod_id having count(*)= (select count(*) from depot);
+
+select product.prod_id 
+from stock, product
+where not exists (select * from depot where not exists (select * from stock where stock.prod_id = product.prod_id and stock.dep = depot.depot_id));
+
+
+
