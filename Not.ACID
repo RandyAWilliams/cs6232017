@@ -1,0 +1,44 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class CS6232017_NOT_ACID {
+
+	public static void main(String[] argv) throws SQLException, ClassNotFoundException {
+		
+		Connection con = null;
+		Statement st = null;
+		
+		String user = "postgres";
+		String pw = "123456";
+		String dataBase = "jdbc:postgresql://127.0.0.1:5432/postgres";
+	
+		Class.forName("org.postgresql.Driver");
+		System.out.println("Attempting connection to Database: " + dataBase + " as user: " + user);
+
+		con = DriverManager.getConnection(dataBase, user, pw);
+
+		System.out.println("Now connected to PostrgreSQL\n");
+
+		st = con.createStatement();
+		
+		try {
+			
+			st.executeUpdate("DELETE FROM Depot WHERE dep_id='d1'");
+			System.out.println("Deleting d1 from Depot");
+			
+		} catch(SQLException e) {
+			
+			System.out.println("Delete Failed");
+		}
+
+		
+		st.executeUpdate("DELETE FROM Stock WHERE dep_id='d1'");
+		System.out.println("Deleting d1 from Stock");
+		
+		con.close();
+		
+		System.out.println("\nTransaction Successful, Terminating");
+	}
+}
