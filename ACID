@@ -1,0 +1,64 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class CS6232017_ACID {
+
+	public static void main(String[] argv) throws SQLException, ClassNotFoundException {
+		
+		Connection con = null;
+		Statement st = null;
+		
+		String user = "postgres";
+		String pw = "123456";
+		String dataBase = "jdbc:postgresql://127.0.0.1:5432/postgres";
+	
+		Class.forName("org.postgresql.Driver");
+		System.out.println("Attempting connection to Database: " + dataBase + " as user: " + user);
+
+		con = DriverManager.getConnection(dataBase, user, pw);
+		
+		// For Atomicity
+		con.setAutoCommit(false);
+		
+		//For Isolation
+		con.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+
+		System.out.println("Now connected to PostrgreSQL\n");
+
+		try {
+			st = con.createStatement();
+			
+			st.executeUpdate("DELETE FROM Stock WHERE dep_id='d1'");
+			System.out.println("Deleting d1 from Stock");
+			st.executeUpdate("DELETE FROM Depot WHERE dep_id='d1'");
+			System.out.println("Deleting d1 from Depot");
+			
+//			The delete statements are reversed below. Comment the above statements and uncomment the below statements to test the atomicity of the code.
+//			The first statement will fail due to foreign key violation. The second statement will not execute because the first statement did not execute.
+//			When con.rollback(); is called that database state will be restored the state it was in before the transaction began.
+/*
+			st.executeUpdate("DELETE FROM Depot WHERE dep_id='d1'");
+			System.out.println("Deleting d1 from Depot");
+			
+			st.executeUpdate("DELETE FROM Stock WHERE dep_id='d1'");
+			System.out.println("Deleting d1 from Stock");
+*/
+		} catch(SQLException e) {
+			System.out.println("Catch Exception");
+			
+			// For atomicity
+			con.rollback();
+			
+			st.close();
+			con.close();
+			return;
+		}
+		con.commit();
+		st.close();
+		con.close();
+		
+		System.out.println("\nTransaction Successful, Terminating");
+	}
+}
